@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delivery by Israel</title>
+<style>
+body{font-family:Arial,sans-serif;margin:0;background:#f5f5f5;color:#222}
+header{background:#111;color:white;padding:22px;text-align:center}
+header h1{margin:0 0 6px;font-size:28px}
+header p{margin:0;color:#ddd}
+main{max-width:700px;margin:auto;padding:16px}
+.section{background:white;border-radius:14px;padding:15px;margin:14px 0;box-shadow:0 2px 8px #0001}
+h2{font-size:20px;margin-top:0}
+.product{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #eee;padding:12px 0;gap:10px}
+.product:first-of-type{border-top:0}
+.name{flex:1}.price{font-weight:bold}
+.qty{display:flex;align-items:center;gap:8px}
+button{border:0;border-radius:9px;padding:8px 11px;cursor:pointer}
+.minus,.plus{background:#eee;font-size:18px}
+#checkout{background:#fff;border-radius:14px;padding:16px;position:sticky;bottom:10px;box-shadow:0 3px 14px #0002}
+input,select{width:100%;box-sizing:border-box;padding:12px;margin:6px 0 12px;border:1px solid #ddd;border-radius:9px}
+.total{font-size:22px;font-weight:bold;margin:10px 0}
+.whatsapp{width:100%;background:#20b85a;color:white;font-size:17px;font-weight:bold;padding:14px}
+.small{font-size:13px;color:#666}
+</style>
+</head>
+<body>
+<header>
+<h1>Delivery by Israel</h1>
+<p>Productos empacados · Entregas en Aguadulce</p>
+</header>
+
+<main>
+<div class="section">
+<h2>⭐ Estrella Azul</h2>
+<div id="estrella"></div>
+</div>
+<div class="section">
+<h2>🥤 Jugos Del Monte</h2>
+<div id="delmonte"></div>
+</div>
+<div class="section">
+<h2>🥫 De lata</h2>
+<div id="lata"></div>
+</div>
+
+<div id="checkout">
+<h2>Tu pedido</h2>
+<input id="nombre" placeholder="Nombre">
+<input id="direccion" placeholder="Dirección de entrega en Aguadulce">
+<select id="pago">
+<option value="Efectivo">Pago en efectivo</option>
+<option value="Yappy">Yappy</option>
+</select>
+<p class="small">Delivery: $0.50 variable según la zona.</p>
+<div class="total">Subtotal: $<span id="subtotal">0.00</span></div>
+<div class="total">Total: $<span id="total">0.00</span></div>
+<button class="whatsapp" onclick="enviarWhatsApp()">Enviar pedido por WhatsApp</button>
+</div>
+</main>
+
+<script>
+const productos=[
+["estrella","Leche grande 946 ml",1.90],
+["estrella","Leche mediana 473 ml",1.10],
+["estrella","Leche pequeña 250 ml",0.75],
+["estrella","Yogurt 180 g",1.00],
+["estrella","Bebida 946 ml",1.10],
+["estrella","Bebida 473 ml",0.75],
+["estrella","Jugo puro",1.45],
+["estrella","Jugo mediano 473 ml",0.75],
+["delmonte","Jugo Del Monte",0.50],
+["lata","Producto de lata (varios)",0.85]
+];
+const cantidades=Array(productos.length).fill(0);
+function render(){
+ for(const cat of ["estrella","delmonte","lata"]){
+  document.getElementById(cat).innerHTML="";
+ }
+ productos.forEach((p,i)=>{
+  const el=document.createElement("div"); el.className="product";
+  el.innerHTML=`<div class="name">${p[1]}</div><div class="price">$${p[2].toFixed(2)}</div>
+  <div class="qty"><button class="minus" onclick="cambiar(${i},-1)">−</button>
+  <span id="q${i}">0</span><button class="plus" onclick="cambiar(${i},1)">+</button></div>`;
+  document.getElementById(p[0]).appendChild(el);
+ });
+ actualizar();
+}
+function cambiar(i,d){
+ cantidades[i]=Math.max(0,cantidades[i]+d);
+ document.getElementById("q"+i).textContent=cantidades[i];
+ actualizar();
+}
+function actualizar(){
+ let s=0;
+ productos.forEach((p,i)=>s+=p[2]*cantidades[i]);
+ document.getElementById("subtotal").textContent=s.toFixed(2);
+ document.getElementById("total").textContent=(s+(s>0?0.50:0)).toFixed(2);
+}
+function enviarWhatsApp(){
+ const nombre=document.getElementById("nombre").value.trim();
+ const direccion=document.getElementById("direccion").value.trim();
+ const pago=document.getElementById("pago").value;
+ let s=0, lineas=[];
+ productos.forEach((p,i)=>{
+  if(cantidades[i]>0){
+   const t=p[2]*cantidades[i]; s+=t;
+   lineas.push(`• ${p[1]} x${cantidades[i]} = $${t.toFixed(2)}`);
+  }
+ });
+ if(!lineas.length){alert("Selecciona al menos un producto.");return;}
+ if(!nombre||!direccion){alert("Escribe tu nombre y dirección.");return;}
+ const total=s+0.50;
+ const msg=`Hola, Delivery by Israel. Quiero hacer este pedido:%0A%0A${lineas.join("%0A")}%0A%0ASubtotal: $${s.toFixed(2)}%0ADelivery: $0.50 (variable)%0ATotal: $${total.toFixed(2)}%0A%0ANombre: ${encodeURIComponent(nombre)}%0ADirección: ${encodeURIComponent(direccion)}%0APago: ${encodeURIComponent(pago)}`;
+ window.open("https://wa.me/50763408578?text="+msg,"_blank");
+}
+render();
+</script>
+</body>
+</html>
